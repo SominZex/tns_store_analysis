@@ -10,22 +10,6 @@ def profit_margin_analysis(filtered_data):
     filtered_data['costPrice'] = pd.to_numeric(filtered_data['costPrice'], errors='coerce')
     filtered_data['quantity'] = pd.to_numeric(filtered_data['quantity'], errors='coerce')
 
-    # Calculate total selling price and total cost price by multiplying by quantity
-    filtered_data['total_sellingPrice'] = filtered_data['sellingPrice'] * filtered_data['quantity']
-    filtered_data['total_costPrice'] = filtered_data['costPrice'] * filtered_data['quantity']
-
-    # Calculate profit column
-    filtered_data['profit'] = filtered_data['total_sellingPrice'] - filtered_data['total_costPrice']
-
-    # Group by store and sum the total sellingPrice, total costPrice, and profit
-    store_grouped = (filtered_data.groupby('storeName')
-                     .agg({'total_sellingPrice': 'sum', 'total_costPrice': 'sum', 'profit': 'sum'}))
-    store_grouped = store_grouped.reset_index()
-
-    # Calculate average profit margin based on summed values
-    store_grouped['avg_profit_margin'] = ((store_grouped['total_sellingPrice'] - store_grouped['total_costPrice']) / 
-                                           store_grouped['total_sellingPrice']) * 100
-
     # Get unique brands from the filtered data
     unique_brands_in_selected_stores = filtered_data['brandName'].unique().tolist()
 
@@ -40,6 +24,22 @@ def profit_margin_analysis(filtered_data):
 
     # Filter the data to include only selected brands
     filtered_data_brands = filtered_data[filtered_data['brandName'].isin(selected_brands)]
+
+    # Calculate total selling price and total cost price by multiplying by quantity (after filtering)
+    filtered_data_brands['total_sellingPrice'] = filtered_data_brands['sellingPrice'] * filtered_data_brands['quantity']
+    filtered_data_brands['total_costPrice'] = filtered_data_brands['costPrice'] * filtered_data_brands['quantity']
+
+    # Calculate profit column for filtered data
+    filtered_data_brands['profit'] = filtered_data_brands['total_sellingPrice'] - filtered_data_brands['total_costPrice']
+
+    # Group by store and sum the total sellingPrice, total costPrice, and profit
+    store_grouped = (filtered_data_brands.groupby('storeName')
+                     .agg({'total_sellingPrice': 'sum', 'total_costPrice': 'sum', 'profit': 'sum'}))
+    store_grouped = store_grouped.reset_index()
+
+    # Calculate average profit margin based on summed values
+    store_grouped['avg_profit_margin'] = ((store_grouped['total_sellingPrice'] - store_grouped['total_costPrice']) / 
+                                           store_grouped['total_sellingPrice']) * 100
 
     # Group the filtered data by brandName and calculate total sales, total cost, and profit
     product_grouped = (filtered_data_brands.groupby('brandName')
